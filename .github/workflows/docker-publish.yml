@@ -1,4 +1,4 @@
-name: Docker
+name: Docker (TEST)
 
 on:
   push:
@@ -7,6 +7,7 @@ on:
 
 env:
   REGISTRY_GHCR: ghcr.io
+  REGISTRY_DOCKER: docker.io
   IMAGE_NAME: ${{ github.repository }}
 
 jobs:
@@ -18,26 +19,33 @@ jobs:
       id-token: write
     outputs:
       tags: ${{ steps.meta.outputs.tags }}
-      annotations: ${{ steps.meta.outputs.annotations }}
       labels: ${{ steps.meta.outputs.labels }}
     steps:
       - name: Extract Docker metadata
         id: meta
-        uses: docker/metadata-action@369eb591f429131d6889c46b94e711f089e6ca96
+        uses: docker/metadata-action@v4
         with:
           images: |
             ${{ env.REGISTRY_GHCR }}/${{ env.IMAGE_NAME }}
+            ${{ env.REGISTRY_DOCKER }}/${{ env.IMAGE_NAME }}
           tags: |
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
             type=raw,value={{date 'YYYYMMDD-HHmmss' tz='Asia/Seoul'}}
+          labels: |
+            maintainer=your-email@example.com
           flavor: |
             latest=true
 
-  build-amd64:
+  build:
     needs: [set-up]
-    runs-on: [self-hosted, linux, amd64]
+    strategy:
+      matrix:
+        platform: [amd64, arm64]
+    runs-on:
+      - linux
+      - ${{ matrix.platform }}
     permissions:
       contents: read
       packages: write
@@ -56,112 +64,73 @@ jobs:
           CLEAN_VERSION="${{ env.RELEASE_VERSION }}"
           echo "VERSION=${CLEAN_VERSION}" >> $GITHUB_ENV
 
-      # Login to GitHub Container Registry (GHCR)
-      - name: Log into GitHub Container Registry (GHCR)
-        if: github.event_name != 'pull_request'
-        uses: docker/login-action@7ca345011ac4304463197fac0e56eab1bc7e6af0
-        with:
-          registry: ${{ env.REGISTRY_GHCR }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Extract Docker metadata
-        id: meta
-        uses: docker/metadata-action@369eb591f429131d6889c46b94e711f089e6ca96
-        with:
-          images: |
-            ${{ env.REGISTRY_GHCR }}/${{ env.IMAGE_NAME }}
-          tags: |
-            type=raw,value=linux-amd64
-          flavor: |
-            latest=false
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Build Docker image (amd64)
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          build-args: VERSION=${{ env.VERSION }}
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          platforms: linux/amd64
-
-  build-arm64:
-    needs: [set-up]
-    runs-on: [self-hosted, linux, ARM64]
-    permissions:
-      contents: read
-      packages: write
-      id-token: write
-    steps:
-      - name: Set version based on tag
-        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
-
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ env.RELEASE_VERSION }}
-
-      - name: Set Clean Version
+      - name: Convert IMAGE_NAME to lowercase
         run: |
-          CLEAN_VERSION="${{ env.RELEASE_VERSION }}"
-          echo "VERSION=${CLEAN_VERSION}" >> $GITHUB_ENV
+          LOWER_CASE_IMAGE_NAME=$(echo "${{ env.IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]')
+          echo "LOWER_CASE=${LOWER_CASE_IMAGE_NAME}" >> $GITHUB_ENV
 
-      # Login to GitHub Container Registry (GHCR)
       - name: Log into GitHub Container Registry (GHCR)
         if: github.event_name != 'pull_request'
-        uses: docker/login-action@7ca345011ac4304463197fac0e56eab1bc7e6af0
+        uses: docker/login-action@v2
         with:
           registry: ${{ env.REGISTRY_GHCR }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract Docker metadata
-        id: meta
-        uses: docker/metadata-action@369eb591f429131d6889c46b94e711f089e6ca96
+      - name: Log into Docker Registry
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v2
         with:
-          images: |
-            ${{ env.REGISTRY_GHCR }}/${{ env.IMAGE_NAME }}
-          tags: |
-            type=raw,value=linux-arm64
-          flavor: |
-            latest=false
+          registry: ${{ env.REGISTRY_DOCKER }}
+          username: ${{ secrets.DOCKER_USER }}
+          password: ${{ secrets.DOCKER_TOKEN }}
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Build Docker image (arm64)
+      - name: Build and push to GHCR
         uses: docker/build-push-action@v6
         with:
           context: .
-          build-args: VERSION=${{ env.VERSION }}
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          platforms: linux/arm64
+          tags: ${{ env.REGISTRY_GHCR }}/${{ env.LOWER_CASE }}:${{ matrix.platform }}
+          labels: ${{ needs.set-up.outputs.labels }}
+          platforms: linux/${{ matrix.platform }}
+
+      - name: Build and push to Docker Hub
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ env.REGISTRY_DOCKER }}/${{ env.LOWER_CASE }}:${{ matrix.platform }}
+          labels: ${{ needs.set-up.outputs.labels }}
+          platforms: linux/${{ matrix.platform }}
 
   manifest:
-    needs: [set-up, build-amd64, build-arm64]
-    runs-on: ubuntu-latest
+    needs: [set-up, build]
+    runs-on: [linux, ARM64]
     permissions:
       contents: read
       packages: write
       id-token: write
     steps:
-      # Login to GitHub Container Registry (GHCR)
       - name: Log into GitHub Container Registry (GHCR)
         if: github.event_name != 'pull_request'
-        uses: docker/login-action@7ca345011ac4304463197fac0e56eab1bc7e6af0
+        uses: docker/login-action@v2
         with:
           registry: ${{ env.REGISTRY_GHCR }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Log into Docker Registry
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY_DOCKER }}
+          username: ${{ secrets.DOCKER_USER }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      - name: Convert IMAGE_NAME to lowercase
+        run: |
+          LOWER_CASE_IMAGE_NAME=$(echo "${{ env.IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]')
+          echo "IMAGE_NAME_LOWER=${LOWER_CASE_IMAGE_NAME}" >> $GITHUB_ENV
 
       - name: Create and push Docker manifest
         uses: int128/docker-manifest-create-action@v2
@@ -171,5 +140,5 @@ jobs:
           tags: |
             ${{ needs.set-up.outputs.tags }}
           sources: |
-            ${{ env.REGISTRY_DOCKERHUB }}/${{ env.IMAGE_NAME }}:linux-amd64
-            ${{ env.REGISTRY_DOCKERHUB }}/${{ env.IMAGE_NAME }}:linux-arm64
+            ${{ env.REGISTRY_GHCR }}/${{ env.IMAGE_NAME_LOWER }}:amd64
+            ${{ env.REGISTRY_GHCR }}/${{ env.IMAGE_NAME_LOWER }}:arm64
