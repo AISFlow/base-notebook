@@ -1,0 +1,23 @@
+{
+  "name": "base-notebook",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "t1": "docker run --rm -it ghcr.io/aisflow/base-notebook pip list --format=json | pnpm tsx src/process-pip-list.ts && pnpm exec prettier . --write"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "typescript": "^5.6.3"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.15.0",
+    "@types/node": "^22.9.1",
+    "eslint": "^9.15.0",
+    "globals": "^15.12.0",
+    "prettier": "3.3.3",
+    "tsx": "^4.19.2",
+    "typescript-eslint": "^8.15.0"
+  }
+}

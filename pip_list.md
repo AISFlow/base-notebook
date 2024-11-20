@@ -1,5 +1,3 @@
-# base-notebook
-
 |          Package          |    Version     |
 | :-----------------------: | :------------: |
 |          absl-py          |     2.1.0      |
