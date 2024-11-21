@@ -38,6 +38,9 @@ RUN python3 -m pip install --no-cache-dir dart-fss && \
 RUN python3 -m pip install --no-cache-dir opendartreader && \
     find /opt/conda -type f \( -name '__pycache__' -o -name '*.pyc' -o -name '*.pyo' \) -exec bash -c 'echo "Deleting {}"; rm -f {}' \;
 
+RUN python3 -m pip install --no-cache-dir finance-datareader && \
+    find /opt/conda -type f \( -name '__pycache__' -o -name '*.pyc' -o -name '*.pyo' \) -exec bash -c 'echo "Deleting {}"; rm -f {}' \;
+
 # # Clean up pip cache
 # RUN pip cache purge
 
