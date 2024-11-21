@@ -41,6 +41,21 @@ RUN python3 -m pip install --no-cache-dir opendartreader && \
 RUN python3 -m pip install --no-cache-dir finance-datareader && \
     find /opt/conda -type f \( -name '__pycache__' -o -name '*.pyc' -o -name '*.pyo' \) -exec bash -c 'echo "Deleting {}"; rm -f {}' \;
 
+RUN python3 -m pip install --no-cache-dir pgsql && \
+    find /opt/conda -type f \( -name '__pycache__' -o -name '*.pyc' -o -name '*.pyo' \) -exec bash -c 'echo "Deleting {}"; rm -f {}' \;
+
+RUN python3 -m pip install --no-cache-dir psycopg2 && \
+    find /opt/conda -type f \( -name '__pycache__' -o -name '*.pyc' -o -name '*.pyo' \) -exec bash -c 'echo "Deleting {}"; rm -f {}' \;
+
+RUN python3 -m pip install --no-cache-dir PyMySQL && \
+    find /opt/conda -type f \( -name '__pycache__' -o -name '*.pyc' -o -name '*.pyo' \) -exec bash -c 'echo "Deleting {}"; rm -f {}' \; 
+
+RUN python3 -m pip install --no-cache-dir pymongo && \
+    find /opt/conda -type f \( -name '__pycache__' -o -name '*.pyc' -o -name '*.pyo' \) -exec bash -c 'echo "Deleting {}"; rm -f {}' \; 
+
+RUN python3 -m pip install --no-cache-dir SQLAlchemy && \
+    find /opt/conda -type f \( -name '__pycache__' -o -name '*.pyc' -o -name '*.pyo' \) -exec bash -c 'echo "Deleting {}"; rm -f {}' \;  
+
 # # Clean up pip cache
 # RUN pip cache purge
 
