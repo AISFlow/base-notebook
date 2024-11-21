@@ -23,6 +23,15 @@ RUN python3 -m pip install --no-cache-dir dash && \
 RUN python3 -m pip install --no-cache-dir streamlit && \
     find /opt/conda -type f \( -name '__pycache__' -o -name '*.pyc' -o -name '*.pyo' \) -exec bash -c 'echo "Deleting {}"; rm -f {}' \;
 
+RUN python3 -m pip install --no-cache-dir line_profiler && \
+    find /opt/conda -type f \( -name '__pycache__' -o -name '*.pyc' -o -name '*.pyo' \) -exec bash -c 'echo "Deleting {}"; rm -f {}' \;
+
+RUN python3 -m pip install --no-cache-dir memory_profiler && \
+    find /opt/conda -type f \( -name '__pycache__' -o -name '*.pyc' -o -name '*.pyo' \) -exec bash -c 'echo "Deleting {}"; rm -f {}' \;
+
+RUN python3 -m pip install --no-cache-dir pandas-datareader && \
+    find /opt/conda -type f \( -name '__pycache__' -o -name '*.pyc' -o -name '*.pyo' \) -exec bash -c 'echo "Deleting {}"; rm -f {}' \;
+
 # # Clean up pip cache
 # RUN pip cache purge
 
