@@ -10,17 +10,18 @@ RUN apt-get update && \
         libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# RUN set -eux; \
-#         dpkgArch="$(dpkg --print-architecture)"; \
-#             case "${dpkgArch##*-}" in \
-#                 amd64) mecabArch='x86_64';; \
-#                 arm64) mecabArch='aarch64';; \
-#                 *) echo >&2 "unsupported architecture: ${dpkgArch}"; exit 1 ;; \
-#             esac; \
-#         mecabKoUrl="https://github.com/Pusnow/mecab-ko-msvc/releases/download/release-0.999/mecab-ko-linux-${mecabArch}.tar.gz"; \
-#         mecabKoDicUrl="https://github.com/Pusnow/mecab-ko-msvc/releases/download/release-0.999/mecab-ko-dic.tar.gz"; \
-#                 wget "${mecabKoUrl}" -O - | tar -xzvf - -C /opt; \
-#                 wget "${mecabKoDicUrl}" -O - | tar -xzvf - -C /opt/mecab/share
+RUN set -eux; \
+        dpkgArch="$(dpkg --print-architecture)"; \
+            case "${dpkgArch##*-}" in \
+                amd64) mecabArch='x86_64';; \
+                arm64) mecabArch='aarch64';; \
+                *) echo >&2 "unsupported architecture: ${dpkgArch}"; exit 1 ;; \
+            esac; \
+        mecabKoUrl="https://github.com/Pusnow/mecab-ko-msvc/releases/download/release-0.999/mecab-ko-linux-${mecabArch}.tar.gz"; \
+        mecabKoDicUrl="https://github.com/Pusnow/mecab-ko-msvc/releases/download/release-0.999/mecab-ko-dic.tar.gz"; \
+                wget "${mecabKoUrl}" -O - | tar -xzvf - -C /opt; \
+                wget "${mecabKoDicUrl}" -O - | tar -xzvf - -C /opt/mecab/share && \
+    chown -R ${NB_UID}:${NB_GID} /opt/mecab
 
 USER ${NB_UID}
 
@@ -79,8 +80,8 @@ RUN python3 -m pip install --no-cache-dir SQLAlchemy && \
 RUN python3 -m pip install --no-cache-dir konlpy && \
     find /opt/conda -type f \( -name '__pycache__' -o -name '*.pyc' -o -name '*.pyo' \) -exec bash -c 'echo "Deleting {}"; rm -f {}' \;
     
-RUN python3 -m pip install --no-cache-dir mecab-ko-msvc mecab-ko-dic-msvc && \
-    find /opt/conda -type f \( -name '__pycache__' -o -name '*.pyc' -o -name '*.pyo' \) -exec bash -c 'echo "Deleting {}"; rm -f {}' \;
+# RUN python3 -m pip install --no-cache-dir mecab-ko-msvc mecab-ko-dic-msvc && \
+#     find /opt/conda -type f \( -name '__pycache__' -o -name '*.pyc' -o -name '*.pyo' \) -exec bash -c 'echo "Deleting {}"; rm -f {}' \;
 
 # # Clean up pip cache
 # RUN pip cache purge
