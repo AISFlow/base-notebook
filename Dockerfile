@@ -1,6 +1,8 @@
 # Stage 1: Builder
 FROM quay.io/jupyter/all-spark-notebook@sha256:3c11d62e0aa0724aa2984f91066a56a072bcb4dc2cb59feaed634073f172cb21 AS builder
 
+USER root
+
 RUN apt-get update && apt-get install -y \
         --no-install-recommends \
         DEBIAN_FRONTEND=noninteractive \
@@ -18,6 +20,8 @@ RUN apt-get update && apt-get install -y \
 #         mecabKoDicUrl="https://github.com/Pusnow/mecab-ko-msvc/releases/download/release-0.999/mecab-ko-dic.tar.gz"; \
 #                 wget "${mecabKoUrl}" -O - | tar -xzvf - -C /opt; \
 #                 wget "${mecabKoDicUrl}" -O - | tar -xzvf - -C /opt/mecab/share
+
+USER ${NB_UID}
 
 # Install libraries for data processing, visualisation, machine learning, and extensions
 RUN python3 -m pip install --no-cache-dir tensorflow && \
