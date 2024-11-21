@@ -2,6 +2,8 @@
 FROM quay.io/jupyter/all-spark-notebook@sha256:3c11d62e0aa0724aa2984f91066a56a072bcb4dc2cb59feaed634073f172cb21 AS builder
 
 RUN apt-get update && apt-get install -y \
+        --no-install-recommends \
+        DEBIAN_FRONTEND=noninteractive \
         libpq-dev \
     && rm -rf /var/lib/apt/lists/*
     
