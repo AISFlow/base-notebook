@@ -3,9 +3,10 @@ FROM quay.io/jupyter/all-spark-notebook@sha256:3c11d62e0aa0724aa2984f91066a56a07
 
 USER root
 
-RUN apt-get update && apt-get install -y \
-        --no-install-recommends \
+RUN apt-get update && \
         DEBIAN_FRONTEND=noninteractive \
+    apt-get install -y \
+        --no-install-recommends \
         libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
