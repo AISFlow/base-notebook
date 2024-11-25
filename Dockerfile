@@ -3,6 +3,8 @@ FROM quay.io/jupyter/all-spark-notebook@sha256:3c11d62e0aa0724aa2984f91066a56a07
 
 USER root
 
+ENV TZ="Asia/Seoul"
+
 RUN apt-get update && \
         DEBIAN_FRONTEND=noninteractive \
     apt-get install -y \
@@ -43,7 +45,7 @@ RUN python3 -m pip install --no-cache-dir pyspark && \
 
 RUN python3 -m pip install --no-cache-dir dash && \
     find /opt/conda -type f \( -name '__pycache__' -o -name '*.pyc' -o -name '*.pyo' \) -exec bash -c 'echo "Deleting {}"; rm -f {}' \;
-    
+
 RUN python3 -m pip install --no-cache-dir streamlit && \
     find /opt/conda -type f \( -name '__pycache__' -o -name '*.pyc' -o -name '*.pyo' \) -exec bash -c 'echo "Deleting {}"; rm -f {}' \;
 
@@ -67,10 +69,10 @@ RUN python3 -m pip install --no-cache-dir finance-datareader && \
 
 RUN python3 -m pip install --no-cache-dir pgsql && \
     find /opt/conda -type f \( -name '__pycache__' -o -name '*.pyc' -o -name '*.pyo' \) -exec bash -c 'echo "Deleting {}"; rm -f {}' \;
-    
+
 RUN python3 -m pip install --no-cache-dir psycopg2 && \
     find /opt/conda -type f \( -name '__pycache__' -o -name '*.pyc' -o -name '*.pyo' \) -exec bash -c 'echo "Deleting {}"; rm -f {}' \;
-    
+
 RUN python3 -m pip install --no-cache-dir PyMySQL && \
     find /opt/conda -type f \( -name '__pycache__' -o -name '*.pyc' -o -name '*.pyo' \) -exec bash -c 'echo "Deleting {}"; rm -f {}' \; 
 
