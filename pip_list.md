@@ -190,6 +190,7 @@
 |      prompt_toolkit       |     3.0.48     |
 |         protobuf          |     5.28.2     |
 |          psutil           |     6.1.0      |
+|         psycopg2          |     2.9.10     |
 |        ptyprocess         |     0.7.0      |
 |         pure_eval         |     0.2.3      |
 |        py-cpuinfo         |     9.0.0      |
