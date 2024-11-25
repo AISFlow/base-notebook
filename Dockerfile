@@ -67,7 +67,10 @@ RUN python3 -m pip install --no-cache-dir finance-datareader && \
 
 RUN python3 -m pip install --no-cache-dir pgsql && \
     find /opt/conda -type f \( -name '__pycache__' -o -name '*.pyc' -o -name '*.pyo' \) -exec bash -c 'echo "Deleting {}"; rm -f {}' \;
-
+    
+RUN python3 -m pip install --no-cache-dir psycopg2 && \
+    find /opt/conda -type f \( -name '__pycache__' -o -name '*.pyc' -o -name '*.pyo' \) -exec bash -c 'echo "Deleting {}"; rm -f {}' \;
+    
 RUN python3 -m pip install --no-cache-dir PyMySQL && \
     find /opt/conda -type f \( -name '__pycache__' -o -name '*.pyc' -o -name '*.pyo' \) -exec bash -c 'echo "Deleting {}"; rm -f {}' \; 
 
@@ -79,7 +82,7 @@ RUN python3 -m pip install --no-cache-dir SQLAlchemy && \
 
 RUN python3 -m pip install --no-cache-dir konlpy && \
     find /opt/conda -type f \( -name '__pycache__' -o -name '*.pyc' -o -name '*.pyo' \) -exec bash -c 'echo "Deleting {}"; rm -f {}' \;
-    
+
 # RUN python3 -m pip install --no-cache-dir mecab-ko-msvc mecab-ko-dic-msvc && \
 #     find /opt/conda -type f \( -name '__pycache__' -o -name '*.pyc' -o -name '*.pyo' \) -exec bash -c 'echo "Deleting {}"; rm -f {}' \;
 
