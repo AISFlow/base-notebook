@@ -6,11 +6,30 @@ USER root
 ENV TZ="Asia/Seoul"
 
 RUN apt-get update && \
-        DEBIAN_FRONTEND=noninteractive \
-    apt-get install -y \
-        --no-install-recommends \
-        libpq-dev \
-    && rm -rf /var/lib/apt/lists/*
+        DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
+            locales \
+            fonts-noto-cjk \
+            language-pack-ko \
+            fonts-noto-cjk-extra \
+            msttcorefonts && \
+        sed -i 's/# \(en_US.UTF-8\)/\1/' /etc/locale.gen && \
+        sed -i 's/# \(ko_KR.UTF-8\)/\1/' /etc/locale.gen && \
+    locale-gen && \
+    update-locale LANG=ko_KR.UTF-8 && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* && \
+    # D2Coding 폰트 설치
+    wget -O /usr/share/fonts/truetype/D2Coding.zip https://github.com/naver/d2codingfont/releases/download/VER1.3.2/D2Coding-Ver1.3.2-20180524.zip && \
+    unzip /usr/share/fonts/truetype/D2Coding.zip -d /usr/share/fonts/truetype/ && \
+    rm /usr/share/fonts/truetype/D2Coding.zip && \
+    # D2Coding Nerd 폰트 설치
+    mkdir -p /usr/share/fonts/truetype/D2CodingNerd && \
+    wget -O /usr/share/fonts/truetype/D2CodingNerd/D2CodingNerd.ttf https://github.com/kelvinks/D2Coding_Nerd/raw/master/D2Coding%20v.1.3.2%20Nerd%20Font%20Complete.ttf && \
+    # 파일 권한 조정
+    chmod -R 644 /usr/share/fonts/truetype/* && \
+    find /usr/share/fonts/truetype/ -type d -exec chmod 755 {} + && \
+    # 폰트 캐시 갱신
+    fc-cache -f -v
 
 RUN set -eux; \
         dpkgArch="$(dpkg --print-architecture)"; \
