@@ -9,7 +9,7 @@
 |           anyio           |  4.6.2.post1   |
 |          appdirs          |     1.4.4      |
 |         archspec          |     0.2.3      |
-|      arelle-release       |     2.35.9     |
+|      arelle-release       |    2.35.14     |
 |        argon2-cffi        |     23.1.0     |
 |   argon2-cffi-bindings    |     21.2.0     |
 |           arrow           |     1.3.0      |
@@ -122,16 +122,17 @@
 |        jupyterlab         |     4.2.6      |
 |      jupyterlab_git       |     0.50.2     |
 |    jupyterlab_pygments    |     0.3.0      |
+|      jupyterlab_rise      |     0.42.0     |
 |     jupyterlab_server     |     2.27.3     |
 |    jupyterlab_widgets     |     3.0.13     |
-|           keras           |     3.6.0      |
+|           keras           |     3.7.0      |
 |        kiwisolver         |     1.4.7      |
 |          konlpy           |     0.6.0      |
 |        lazy_loader        |      0.4       |
 |         libclang          |     18.1.1     |
 |        libmambapy         |     1.5.10     |
 |         lightgbm          |     4.5.0      |
-|       line_profiler       |     4.1.3      |
+|       line_profiler       |     4.2.0      |
 |         llvmlite          |     0.43.0     |
 |          locket           |     1.0.0      |
 |           lxml            |     5.3.0      |
@@ -158,6 +159,7 @@
 |         nbconvert         |     7.16.4     |
 |          nbdime           |     4.0.2      |
 |         nbformat          |     5.10.4     |
+|         nbgrader          |     0.9.4      |
 |       nest_asyncio        |     1.6.0      |
 |         networkx          |     3.4.2      |
 |         notebook          |     7.2.2      |
@@ -180,7 +182,6 @@
 |           partd           |     1.4.2      |
 |           patsy           |     1.0.1      |
 |          pexpect          |     4.9.0      |
-|           pgsql           |      2.2       |
 |        pickleshare        |     0.7.5      |
 |          pillow           |     11.0.0     |
 |            pip            |     24.3.1     |
@@ -217,6 +218,7 @@
 |        PyWavelets         |     1.7.0      |
 |          PyYAML           |     6.0.2      |
 |           pyzmq           |     26.2.0     |
+|         RapidFuzz         |     3.10.1     |
 |        referencing        |     0.35.1     |
 |           regex           |   2024.11.6    |
 |         requests          |     2.32.3     |
@@ -242,7 +244,7 @@
 |        SQLAlchemy         |     2.0.36     |
 |        stack-data         |     0.6.2      |
 |        statsmodels        |     0.14.4     |
-|         streamlit         |     1.40.1     |
+|         streamlit         |     1.40.2     |
 |           sympy           |     1.13.1     |
 |          tables           |     3.10.1     |
 |           tblib           |     3.0.0      |
@@ -252,6 +254,7 @@
 |        tensorflow         |     2.18.0     |
 |         termcolor         |     2.3.0      |
 |         terminado         |     0.18.1     |
+|          thefuzz          |     0.22.1     |
 |       threadpoolctl       |     3.5.0      |
 |         tifffile          |   2024.9.20    |
 |         tinycss2          |     1.4.0      |
@@ -259,6 +262,8 @@
 |           tomli           |     2.1.0      |
 |           toolz           |     1.0.0      |
 |           torch           |     2.5.1      |
+|        torchaudio         |     2.5.1      |
+|        torchvision        |     0.20.1     |
 |          tornado          |     6.4.1      |
 |           tqdm            |     4.67.0     |
 |         traitlets         |     5.14.3     |
@@ -279,7 +284,7 @@
 |           wheel           |     0.45.0     |
 |    widgetsnbextension     |     4.0.13     |
 |           wrapt           |     1.17.0     |
-|          xgboost          |     2.1.2      |
+|          xgboost          |     2.1.3      |
 |           xlrd            |     2.0.1      |
 |         xmltodict         |     0.14.2     |
 |        xyzservices        |    2024.9.0    |

@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "t1": "docker run --rm -it ghcr.io/aisflow/base-notebook pip list --format=json | pnpm tsx src/process-pip-list.ts && pnpm exec prettier . --write"
+    "t1": "docker run --rm -it aisflow/base-notebook pip list --format=json | pnpm tsx src/process-pip-list.ts && pnpm exec prettier . --write"
   },
   "keywords": [],
   "author": "",
