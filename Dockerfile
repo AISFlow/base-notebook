@@ -12,8 +12,8 @@ RUN set -eux; \
         DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
             jq libpq-dev \
             locales language-pack-ko \
-            fontconfig \
-            nodejs npm && \
+            fontconfig && \
+            # nodejs npm && \
         # Locale settings
             sed -i 's/# \(en_US.UTF-8\)/\1/' /etc/locale.gen && \
             sed -i 's/# \(ko_KR.UTF-8\)/\1/' /etc/locale.gen && \
@@ -28,24 +28,24 @@ RUN set -eux; \
             FONT_DIR="/usr/share/fonts/truetype/${RELATIVE_PATH}"; \
             mkdir -p "${FONT_DIR}" && \
             ENCODED_FONT_NAME=$(printf "%s" "${FONT_NAME}" | jq -sRr @uri) && \
-            wget -O "${FONT_DIR}/${FONT_NAME}" "https://raw.githubusercontent.com/google/fonts/17216f1645a133dbbeaa506f0f63f701861b6c7b/ofl/${RELATIVE_PATH}/${ENCODED_FONT_NAME}"; \
+            wget --quiet -O "${FONT_DIR}/${FONT_NAME}" "https://raw.githubusercontent.com/google/fonts/17216f1645a133dbbeaa506f0f63f701861b6c7b/ofl/${RELATIVE_PATH}/${ENCODED_FONT_NAME}"; \
         } && \
         # Install D2Coding font
             mkdir -p /usr/share/fonts/truetype/D2Coding && \
-                wget -O /usr/share/fonts/truetype/D2Coding.zip https://github.com/naver/d2codingfont/releases/download/VER1.3.2/D2Coding-Ver1.3.2-20180524.zip && \
+                wget --quiet -O /usr/share/fonts/truetype/D2Coding.zip https://github.com/naver/d2codingfont/releases/download/VER1.3.2/D2Coding-Ver1.3.2-20180524.zip && \
                 unzip /usr/share/fonts/truetype/D2Coding.zip -d /usr/share/fonts/truetype/ && \
             rm /usr/share/fonts/truetype/D2Coding.zip && \
         # Install D2Coding Nerd font
             mkdir -p /usr/share/fonts/truetype/D2CodingNerd && \
-                wget -O /usr/share/fonts/truetype/D2CodingNerd/D2CodingNerd.ttf https://github.com/kelvinks/D2Coding_Nerd/raw/master/D2Coding%20v.1.3.2%20Nerd%20Font%20Complete.ttf && \
+                wget --quiet -O /usr/share/fonts/truetype/D2CodingNerd/D2CodingNerd.ttf https://github.com/kelvinks/D2Coding_Nerd/raw/master/D2Coding%20v.1.3.2%20Nerd%20Font%20Complete.ttf && \
         # Install Pretendard font
             mkdir -p /usr/share/fonts/truetype/Pretendard && \
-                wget -O /usr/share/fonts/truetype/Pretendard.zip https://github.com/orioncactus/pretendard/releases/download/v1.3.9/Pretendard-1.3.9.zip && \
+                wget --quiet -O /usr/share/fonts/truetype/Pretendard.zip https://github.com/orioncactus/pretendard/releases/download/v1.3.9/Pretendard-1.3.9.zip && \
                 unzip /usr/share/fonts/truetype/Pretendard.zip -d /usr/share/fonts/truetype/Pretendard/ && \
             rm /usr/share/fonts/truetype/Pretendard.zip && \
         # Install PretendardJP font
             mkdir -p /usr/share/fonts/truetype/PretendardJP && \
-                wget -O /usr/share/fonts/truetype/PretendardJP.zip https://github.com/orioncactus/pretendard/releases/download/v1.3.9/PretendardJP-1.3.9.zip && \
+                wget --quiet -O /usr/share/fonts/truetype/PretendardJP.zip https://github.com/orioncactus/pretendard/releases/download/v1.3.9/PretendardJP-1.3.9.zip && \
                 unzip /usr/share/fonts/truetype/PretendardJP.zip -d /usr/share/fonts/truetype/PretendardJP/ && \
             rm /usr/share/fonts/truetype/PretendardJP.zip && \
         # Noto Fonts
@@ -104,19 +104,19 @@ RUN set -eux; \
             esac; \
         mecabKoUrl="https://github.com/Pusnow/mecab-ko-msvc/releases/download/release-0.999/mecab-ko-linux-${mecabArch}.tar.gz"; \
         mecabKoDicUrl="https://github.com/Pusnow/mecab-ko-msvc/releases/download/release-0.999/mecab-ko-dic.tar.gz"; \
-                wget "${mecabKoUrl}" -O - | tar -xzvf - -C /opt; \
-                wget "${mecabKoDicUrl}" -O - | tar -xzvf - -C /opt/mecab/share && \
+                wget --quiet "${mecabKoUrl}" -O - | tar -xzvf - -C /opt; \
+                wget --quiet "${mecabKoDicUrl}" -O - | tar -xzvf - -C /opt/mecab/share && \
     chown -R ${NB_UID}:${NB_GID} /opt/mecab
 
 USER ${NB_UID}
 
 RUN set -eux; \
-    python3 -m pip install --no-cache-dir \
+    python3 -m pip install --upgrade --no-cache-dir --upgrade-strategy=eager \
         # Jupyter-related packages
-            jupyter_server_terminals nbgrader jupyterlab_rise \
+            nbgrader jupyterlab_rise \
             ipympl ipydatagrid jupyterlab-language-pack-ko-KR \
-            jupyterlab-drawio jupyterlab_github jupyterlab-latex \
-            jupyterlab_sql \
+            ipydrawio ipydrawio-export \
+            jupyterlab-latex jupyterlab-katex \
         # Data processing and analysis
             pandas-datareader psycopg2 pymysql pymongo sqlalchemy \
             xgboost lightgbm pyspark \
@@ -132,10 +132,10 @@ RUN set -eux; \
         # Dashboards and visualization
             dash streamlit \
         # Miscellaneous
-            sas_kernel thefuzz nbdime && \
+            sas_kernel thefuzz && \
     find /opt/conda -type f \( -name '__pycache__' -o -name '*.pyc' -o -name '*.pyo' \) -exec rm -f {} + && \
-    jupyter lab clean --all && \
-    jupyter lab build --debug && \
+    # jupyter lab clean --all && \
+    # jupyter lab build --debug && \
     rm -rf "/home/${NB_USER}/.cache/" && \
     { \
             echo "# Default font family"; \
