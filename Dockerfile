@@ -1,5 +1,5 @@
 # Stage 1: Builder
-FROM quay.io/jupyter/all-spark-notebook@sha256:3c11d62e0aa0724aa2984f91066a56a072bcb4dc2cb59feaed634073f172cb21 AS builder
+FROM quay.io/jupyter/all-spark-notebook@sha256:ca186bece1f689dbb593ad7e73eabc735ed09b118ac89244f61e6cee33fcba22 AS builder
 
 USER root
 
