@@ -3,16 +3,17 @@ FROM quay.io/jupyter/all-spark-notebook@sha256:3c11d62e0aa0724aa2984f91066a56a07
 
 USER root
 
-ENV TZ="Asia/Seoul"
+ENV TZ="Asia/Seoul" \
+    TRANSFORMERS_CACHE="/tmp/.cache" \
+    TOKENIZERS_PARALLELISM=true
 
 RUN set -eux; \
         apt-get update && \
         DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
-            jq \
-            libpq-dev \
-            locales \
-            language-pack-ko \
-            fontconfig && \
+            jq libpq-dev \
+            locales language-pack-ko \
+            fontconfig \
+            nodejs npm && \
         # Locale settings
             sed -i 's/# \(en_US.UTF-8\)/\1/' /etc/locale.gen && \
             sed -i 's/# \(ko_KR.UTF-8\)/\1/' /etc/locale.gen && \
@@ -110,20 +111,31 @@ RUN set -eux; \
 USER ${NB_UID}
 
 RUN set -eux; \
-    # OOM Issue (AMD64)
-    # mamba install --yes --quiet \
-    #     xgboost lightgbm pandas-datareader pyspark \
-    #     psycopg2 pymysql pymongo sqlalchemy \
-    #     dash streamlit line_profiler memory_profiler \
-    #     nbgrader thefuzz jupyterlab_rise && \
-    # mamba clean --all --yes --quiet && \
     python3 -m pip install --no-cache-dir \
-        xgboost lightgbm pandas-datareader pyspark \
-        psycopg2 pymysql pymongo sqlalchemy \
-        dash streamlit line_profiler memory_profiler \
-        nbgrader thefuzz jupyterlab_rise \
-        tensorflow torch torchaudio torchvision konlpy dart-fss opendartreader finance-datareader && \
+        # Jupyter-related packages
+            jupyter_server_terminals nbgrader jupyterlab_rise \
+            ipympl ipydatagrid jupyterlab-language-pack-ko-KR \
+            jupyterlab-drawio jupyterlab_github jupyterlab-latex \
+            jupyterlab_sql \
+        # Data processing and analysis
+            pandas-datareader psycopg2 pymysql pymongo sqlalchemy \
+            xgboost lightgbm pyspark \
+        # Machine learning and AI
+            tensorflow torch torchaudio torchvision transformers \
+            datasets tokenizers nltk pytorch_lightning gradio \
+            sentencepiece seqeval wordcloud tweepy \
+            jax jaxlib optax \
+        # Korean-specific NLP and financial data
+            konlpy dart-fss opendartreader finance-datareader \
+        # Profiling and utilities
+            line_profiler memory_profiler \
+        # Dashboards and visualization
+            dash streamlit \
+        # Miscellaneous
+            sas_kernel thefuzz nbdime && \
     find /opt/conda -type f \( -name '__pycache__' -o -name '*.pyc' -o -name '*.pyo' \) -exec rm -f {} + && \
+    jupyter lab clean --all && \
+    jupyter lab build --debug && \
     rm -rf "/home/${NB_USER}/.cache/" && \
     { \
             echo "# Default font family"; \
@@ -143,8 +155,5 @@ RUN set -eux; \
             echo ""; \
             echo "# Fantasy fonts"; \
             echo "font.fantasy: \"Noto Sans KR\", \"Noto Sans JP\", \"IBM Plex Sans\", \"Nimbus Sans\", fantasy"; \
-    } > /home/${NB_USER}/.config/matplotlib/matplotlibrc && \
-    mkdir -p ~/.jupyter/custom && \
-    { \
-            echo ""; \
-    } > /home/${NB_USER}/.jupyter/custom/custom.css
+    } > /home/${NB_USER}/.config/matplotlib/matplotlibrc
+

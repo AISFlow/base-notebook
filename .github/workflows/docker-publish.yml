@@ -3,6 +3,8 @@ name: Docker (TEST)
 on:
   push:
     tags: ['v*.*.*']
+    paths:
+      - 'Dockerfile'
   workflow_dispatch:
 
 env:
