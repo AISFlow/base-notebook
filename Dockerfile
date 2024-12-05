@@ -115,7 +115,7 @@ RUN set -eux; \
         # Jupyter-related packages
             nbgrader jupyterlab_rise \
             ipympl ipydatagrid jupyterlab-language-pack-ko-KR \
-            ipydrawio ipydrawio-export \
+            ipydrawio ipydrawio-export jupydrive_s3 \
             jupyterlab-latex jupyterlab-katex \
         # Data processing and analysis
             pandas-datareader psycopg2 pymysql pymongo sqlalchemy \
