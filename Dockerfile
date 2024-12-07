@@ -140,8 +140,11 @@ RUN set -eux; \
 USER ${NB_UID}
 
 # Install packages using Mamba
-RUN python3 -m pip install --no-cache-dir \
-        'grpcio-status' 'grpcio' 'pandas==2.2.2' 'pyarrow' \
+RUN mamba install --yes \
+        'r-base' 'r-ggplot2' 'r-irkernel' 'r-rcurl' 'r-sparklyr' && \
+    mamba clean --all -f -y && \
+    python3 -m pip install --no-cache-dir \
+        'grpcio-status' 'grpcio' 'pandas==2.2.3' 'pyarrow' \
         'transformers' 'datasets' 'tokenizers' 'nltk' 'jax' 'jaxlib' 'optax' \
         'pandas-datareader' 'psycopg2' 'pymysql' 'pymongo' 'sqlalchemy' \
         'sentencepiece' 'seqeval' 'wordcloud' 'tweepy' 'gradio' \
@@ -152,12 +155,9 @@ RUN python3 -m pip install --no-cache-dir \
     python3 -m pip install --no-cache-dir --index-url 'https://download.pytorch.org/whl/cpu' \
         'torch' 'torchaudio' 'torchvision' && \
     python3 -m pip install --no-cache-dir \
-        'jupyterlab>=4.3.2' 'jupyterlab_rise' 'thefuzz' 'ipympl' \
-        'jupyterlab-latex' 'jupyterlab-katex' 'ipydatagrid' && \
-    mamba install --yes \
-        'r-base' 'r-ggplot2' 'r-irkernel' 'r-rcurl' 'r-sparklyr' \
+        'jupyterlab' 'jupyterlab_rise' 'thefuzz' 'ipympl' \
+        'jupyterlab-latex' 'jupyterlab-katex' 'ipydatagrid' \
         'jupyterlab-language-pack-ko-KR' && \
-    mamba clean --all -f -y && \
     fix-permissions "${CONDA_DIR}" && \
     fix-permissions "/home/${NB_USER}" && \
     rm -rf "/home/${NB_USER}/.cache/" && \
