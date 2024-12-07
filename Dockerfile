@@ -140,25 +140,23 @@ RUN set -eux; \
 USER ${NB_UID}
 
 # Install packages using Mamba
-RUN mamba install --yes \
-        'grpcio-status' 'grpcio' 'pandas=2.2.2' 'pyarrow' \
-        'r-base' 'r-ggplot2' 'r-irkernel' 'r-rcurl' 'r-sparklyr' \
-        'ipympl' 'jupyterlab-latex' 'jupyterlab-katex' \
+RUN python3 -m pip install --no-cache-dir \
+        'grpcio-status' 'grpcio' 'pandas==2.2.2' 'pyarrow' \
         'transformers' 'datasets' 'tokenizers' 'nltk' 'jax' 'jaxlib' 'optax' \
-        'ipydatagrid' 'jupyterlab-language-pack-ko-KR' \
         'pandas-datareader' 'psycopg2' 'pymysql' 'pymongo' 'sqlalchemy' \
         'sentencepiece' 'seqeval' 'wordcloud' 'tweepy' 'gradio' \
         'dash' 'streamlit' \
-        'jupyterlab>=4.3.2' \
-        'line_profiler' 'memory_profiler' \
-    && \
+        'line-profiler' 'memory-profiler' \
+        'konlpy' 'dart-fss' 'opendartreader' 'finance-datareader' \
+        'elasticsearch' 'elasticsearch-dsl' 'sentence-transformers' && \
     python3 -m pip install --no-cache-dir --index-url 'https://download.pytorch.org/whl/cpu' \
-        'torch' \
-        'torchaudio' \
-        'torchvision' && \
+        'torch' 'torchaudio' 'torchvision' && \
     python3 -m pip install --no-cache-dir \
-        'jupyterlab_rise' 'thefuzz' 'konlpy' 'dart-fss' 'opendartreader' 'finance-datareader' \
-        'elasticsearch' 'elasticsearch-dsl' 'sentence-transformers' 'sas_kernel' && \
+        'jupyterlab>=4.3.2' 'jupyterlab_rise' 'thefuzz' 'ipympl' \
+        'jupyterlab-latex' 'jupyterlab-katex' 'ipydatagrid' && \
+    mamba install --yes \
+        'r-base' 'r-ggplot2' 'r-irkernel' 'r-rcurl' 'r-sparklyr' \
+        'jupyterlab-language-pack-ko-KR' && \
     mamba clean --all -f -y && \
     fix-permissions "${CONDA_DIR}" && \
     fix-permissions "/home/${NB_USER}" && \
