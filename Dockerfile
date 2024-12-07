@@ -1,28 +1,57 @@
-# Stage 1: Builder
-FROM quay.io/jupyter/all-spark-notebook@sha256:ca186bece1f689dbb593ad7e73eabc735ed09b118ac89244f61e6cee33fcba22 AS builder
+FROM quay.io/jupyter/datascience-notebook@sha256:78525a108f91de127eacdf27669b8bc97ee562445429854223f72eb99734be4a AS build
+
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 USER root
 
+ARG openjdk_version="17"
+ARG spark_version
+ARG hadoop_version="3"
+ARG scala_version
+ARG spark_download_url="https://dlcdn.apache.org/spark/"
+
+RUN apt-get update --yes && \
+    apt-get install --yes --no-install-recommends \
+    "openjdk-${openjdk_version}-jre-headless" \
+    ca-certificates-java fonts-dejavu gfortran \
+    gcc jq libpq-dev locales language-pack-ko fontconfig && \
+    # Locale settings
+        sed -i 's/# \(en_US.UTF-8\)/\1/' /etc/locale.gen && \
+        sed -i 's/# \(ko_KR.UTF-8\)/\1/' /etc/locale.gen && \
+        locale-gen && \
+        update-locale LANG=ko_KR.UTF-8&& \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+ENV SPARK_HOME=/usr/local/spark
+ENV PATH="${PATH}:${SPARK_HOME}/bin"
+ENV SPARK_OPTS="--driver-java-options=-Xms1024M --driver-java-options=-Xmx4096M --driver-java-options=-Dlog4j.logLevel=info"
+ENV R_LIBS_USER="${SPARK_HOME}/R/lib"
 ENV TZ="Asia/Seoul" \
     TRANSFORMERS_CACHE="/tmp/.cache" \
     TOKENIZERS_PARALLELISM=true
 
+COPY --from=quay.io/jupyter/pyspark-notebook "/opt/setup-scripts/setup_spark.py" "/opt/setup-scripts/setup_spark.py"
+COPY --from=quay.io/jupyter/pyspark-notebook "/etc/ipython/ipython_kernel_config.py" "/etc/ipython/ipython_kernel_config.py"
+
+# Setup Spark
+RUN /opt/setup-scripts/setup_spark.py \
+    --spark-version="${spark_version}" \
+    --hadoop-version="${hadoop_version}" \
+    --scala-version="${scala_version}" \
+    --spark-download-url="${spark_download_url}"
+
+
+
+RUN fix-permissions "/etc/ipython/" && \
+    fix-permissions "${R_LIBS_USER}" && \
+    { \
+        echo "#!/bin/bash"; \
+        echo "set -e"; \
+        echo "export TENSORBOARD_PROXY_URL=\"\${JUPYTERHUB_SERVICE_PREFIX:-/}proxy/%PORT%/\""; \
+    } > /usr/local/bin/before-notebook.d/20tensorboard-proxy-env.sh && \
+    chmod +x /usr/local/bin/before-notebook.d/20tensorboard-proxy-env.sh
+
 RUN set -eux; \
-        apt-get update && \
-        DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
-            jq libpq-dev \
-            locales language-pack-ko \
-            fontconfig && \
-            # nodejs npm && \
-        # Locale settings
-            sed -i 's/# \(en_US.UTF-8\)/\1/' /etc/locale.gen && \
-            sed -i 's/# \(ko_KR.UTF-8\)/\1/' /etc/locale.gen && \
-            locale-gen && \
-            update-locale LANG=ko_KR.UTF-8 && \
-        # Remove unnecessary files
-        apt-get clean && \
-            rm -rf /var/lib/apt/lists/* && \
-        # Define function for font installation
         install_google_font() { \
             RELATIVE_PATH=$1; FONT_NAME=$2; \
             FONT_DIR="/usr/share/fonts/truetype/${RELATIVE_PATH}"; \
@@ -93,9 +122,7 @@ RUN set -eux; \
         chmod -R 644 /usr/share/fonts/truetype/* && \
             find /usr/share/fonts/truetype/ -type d -exec chmod 755 {} + && \
         # Update font cache
-        fc-cache -f -v
-
-RUN set -eux; \
+        fc-cache -f -v && \
         dpkgArch="$(dpkg --print-architecture)"; \
             case "${dpkgArch##*-}" in \
                 amd64) mecabArch='x86_64';; \
@@ -106,36 +133,35 @@ RUN set -eux; \
         mecabKoDicUrl="https://github.com/Pusnow/mecab-ko-msvc/releases/download/release-0.999/mecab-ko-dic.tar.gz"; \
                 wget --quiet "${mecabKoUrl}" -O - | tar -xzvf - -C /opt; \
                 wget --quiet "${mecabKoDicUrl}" -O - | tar -xzvf - -C /opt/mecab/share && \
-    chown -R ${NB_UID}:${NB_GID} /opt/mecab
+    fix-permissions "/opt/mecab" && \
+    fix-permissions "${CONDA_DIR}" && \
+    rm -rf /opt/conda/var/cache/fontconfig/
 
 USER ${NB_UID}
 
-RUN set -eux; \
-    python3 -m pip install --upgrade --no-cache-dir --upgrade-strategy=eager \
-        # Jupyter-related packages
-            nbgrader jupyterlab_rise \
-            ipympl ipydatagrid jupyterlab-language-pack-ko-KR \
-            ipydrawio ipydrawio-export jupydrive_s3 \
-            jupyterlab-latex jupyterlab-katex \
-        # Data processing and analysis
-            pandas-datareader psycopg2 pymysql pymongo sqlalchemy \
-            xgboost lightgbm pyspark \
-        # Machine learning and AI
-            tensorflow torch torchaudio torchvision transformers \
-            datasets tokenizers nltk pytorch_lightning gradio \
-            sentencepiece seqeval wordcloud tweepy \
-            jax jaxlib optax \
-        # Korean-specific NLP and financial data
-            konlpy dart-fss opendartreader finance-datareader \
-        # Profiling and utilities
-            line_profiler memory_profiler \
-        # Dashboards and visualization
-            dash streamlit \
-        # Miscellaneous
-            sas_kernel thefuzz && \
-    find /opt/conda -type f \( -name '__pycache__' -o -name '*.pyc' -o -name '*.pyo' \) -exec rm -f {} + && \
-    # jupyter lab clean --all && \
-    # jupyter lab build --debug && \
+# Install packages using Mamba
+RUN mamba install --yes \
+        'grpcio-status' 'grpcio' 'pandas=2.2.2' 'pyarrow' \
+        'r-base' 'r-ggplot2' 'r-irkernel' 'r-rcurl' 'r-sparklyr' \
+        'ipympl' 'jupyterlab-latex' 'jupyterlab-katex' \
+        'transformers' 'datasets' 'tokenizers' 'nltk' 'jax' 'jaxlib' 'optax' \
+        'ipydatagrid' 'jupyterlab-language-pack-ko-KR' \
+        'pandas-datareader' 'psycopg2' 'pymysql' 'pymongo' 'sqlalchemy' \
+        'sentencepiece' 'seqeval' 'wordcloud' 'tweepy' 'gradio' \
+        'dash' 'streamlit' \
+        'jupyterlab>=4.3.2' \
+        'line_profiler' 'memory_profiler' \
+    && \
+    python3 -m pip install --no-cache-dir --index-url 'https://download.pytorch.org/whl/cpu' \
+        'torch' \
+        'torchaudio' \
+        'torchvision' && \
+    python3 -m pip install --no-cache-dir \
+        'jupyterlab_rise' 'thefuzz' 'konlpy' 'dart-fss' 'opendartreader' 'finance-datareader' \
+        'elasticsearch' 'elasticsearch-dsl' 'sentence-transformers' 'sas_kernel' && \
+    mamba clean --all -f -y && \
+    fix-permissions "${CONDA_DIR}" && \
+    fix-permissions "/home/${NB_USER}" && \
     rm -rf "/home/${NB_USER}/.cache/" && \
     { \
             echo "# Default font family"; \
@@ -157,3 +183,4 @@ RUN set -eux; \
             echo "font.fantasy: \"Noto Sans KR\", \"Noto Sans JP\", \"IBM Plex Sans\", \"Nimbus Sans\", fantasy"; \
     } > /home/${NB_USER}/.config/matplotlib/matplotlibrc
 
+WORKDIR "${HOME}"
