@@ -157,7 +157,7 @@ RUN mamba install --yes \
     python3 -m pip install --no-cache-dir \
         'jupyterlab' 'jupyterlab_rise' 'thefuzz' 'ipympl' \
         'jupyterlab-latex' 'jupyterlab-katex' 'ipydatagrid' \
-        'jupyterlab-language-pack-ko-KR' && \
+        'jupyterlab-language-pack-ko-KR' 'sas_kernel' && \
     fix-permissions "${CONDA_DIR}" && \
     fix-permissions "/home/${NB_USER}" && \
     rm -rf "/home/${NB_USER}/.cache/" && \
