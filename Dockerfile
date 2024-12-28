@@ -148,7 +148,7 @@ RUN mamba install --yes \
         'transformers' 'datasets' 'tokenizers' 'nltk' 'jax' 'jaxlib' 'optax' \
         'pandas-datareader' 'psycopg2' 'pymysql' 'pymongo' 'sqlalchemy' \
         'sentencepiece' 'seqeval' 'wordcloud' 'tweepy' 'gradio' \
-        'dash' 'streamlit' \
+        'dash' 'streamlit' 'tensorflow' \
         'line-profiler' 'memory-profiler' \
         'konlpy' 'dart-fss' 'opendartreader' 'finance-datareader' \
         'elasticsearch' 'elasticsearch-dsl' 'sentence-transformers' && \
