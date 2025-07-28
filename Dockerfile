@@ -1,4 +1,4 @@
-FROM quay.io/jupyter/datascience-notebook@sha256:b3b0849750de09ba0d1ef7c06f403ae91dfbb9e25b34fb2d179b4049eaf06d29 AS build
+FROM quay.io/jupyter/datascience-notebook@sha256:4b93f99fc05b7a4d2318bc1a25ca36083132bb9dfdf280c2e7edd7f6a3075a11 AS build
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
